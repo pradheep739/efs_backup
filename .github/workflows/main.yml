@@ -22,7 +22,7 @@ jobs:
       - name: Create EFS Backup
         id: create_backup
         run: |
-          aws backup start-backup-job \
+          BACKUP_JOB_ID=$(aws backup start-backup-job \
             --backup-vault-name "EFS_backup_vault" \
             --resource-arn "arn:aws:elasticfilesystem:ap-south-1:058264262021:file-system/fs-0c7630c295e6d5b45" \
             --iam-role-arn "arn:aws:iam::058264262021:role/githubaction-aws-identity-role" \
@@ -38,3 +38,13 @@ jobs:
           aws backup tag-resource \
             --resource-arn "arn:aws:backup:${{ secrets.AWS_REGION }}:backup-job/$BACKUP_JOB_ID" \
             --tags Retention=1
+
+      - name: Cleanup Old Backups
+        run: |
+          aws backup list-backup-jobs \
+            --backup-vault-name "EFS_backup_vault" \
+            --query 'BackupJobs[?CompletionDate<`date -d "1 day ago" -u +%Y-%m-%dT%H:%M:%S`].BackupJobId' \
+            --output text | while read backup_job_id; do
+              aws backup delete-backup \
+                --backup-job-id "$backup_job_id"
+            done
