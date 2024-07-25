@@ -22,11 +22,11 @@ jobs:
       - name: Create EFS Backup
         id: create_backup
         run: |
-          BACKUP_JOB_ID=$(aws backup start-backup-job \
-            --backup-vault-name "${{ secrets.VAULT_NAME }}" \
-            --resource-arn "arn:aws:elasticfilesystem:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:file-system/${{ secrets.EFS_ID }}" \
-            --iam-role-arn "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/githubaction-aws-identity-role" \
-            --region "${{ secrets.AWS_REGION }}" \
+          aws backup start-backup-job \
+            --backup-vault-name "EFS_backup_vault" \
+            --resource-arn "arn:aws:elasticfilesystem:ap-south-1:058264262021:file-system/fs-0c7630c295e6d5b45" \
+            --iam-role-arn "arn:aws:iam::058264262021:role/githubaction-aws-identity-role" \
+            --region "ap-south-1" \
             --query 'BackupJobId' \
             --output text)
           echo "Backup Job ID: $BACKUP_JOB_ID"
