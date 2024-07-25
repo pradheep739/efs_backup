@@ -25,7 +25,7 @@ jobs:
           BACKUP_JOB_ID=$(aws backup start-backup-job \
             --backup-vault-name "${{ secrets.VAULT_NAME }}" \
             --resource-arn "arn:aws:elasticfilesystem:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:file-system/${{ secrets.EFS_ID }}" \
-            --iam-role-arn "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/service-role/AWSBackupDefaultServiceRole" \
+            --iam-role-arn "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/githubaction-aws-identity-role" \
             --region "${{ secrets.AWS_REGION }}" \
             --query 'BackupJobId' \
             --output text)
