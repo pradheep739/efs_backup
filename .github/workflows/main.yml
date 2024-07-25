@@ -1,24 +1,28 @@
 name: EFS-Backup
+
 on:
   workflow_dispatch:
+
 permissions:
-      id-token: write   # This is required for requesting the JWT
-      contents: read    # This is required for actions/checkout
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
 jobs:
-   EFS-Backup:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Configure AWS Credentials
-          uses: aws-actions/configure-aws-credentials@v1
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: ${{ secrets.AWS_REGION }}
-        - name: Create EFS Backup
-          id: create_backup
-          run: |
-          
-            BACKUP_JOB_ID=$(aws backup start-backup-job \
+  EFS-Backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Create EFS Backup
+        id: create_backup
+        run: |
+          BACKUP_JOB_ID=$(aws backup start-backup-job \
             --backup-vault-name "${{ secrets.VAULT_NAME }}" \
             --resource-arn "arn:aws:elasticfilesystem:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:file-system/${{ secrets.EFS_ID }}" \
             --iam-role-arn "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/service-role/AWSBackupDefaultServiceRole" \
@@ -28,9 +32,9 @@ jobs:
           echo "Backup Job ID: $BACKUP_JOB_ID"
           echo "::set-output name=backup_job_id::$BACKUP_JOB_ID"
 
-        - name: Tag Backup for Retention
-          run: |
-            BACKUP_JOB_ID=${{ steps.create_backup.outputs.backup_job_id }}
-            aws backup tag-resource \
+      - name: Tag Backup for Retention
+        run: |
+          BACKUP_JOB_ID=${{ steps.create_backup.outputs.backup_job_id }}
+          aws backup tag-resource \
             --resource-arn "arn:aws:backup:${{ secrets.AWS_REGION }}:backup-job/$BACKUP_JOB_ID" \
             --tags Retention=1
