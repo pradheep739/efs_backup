@@ -4,31 +4,30 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write  # This is required for requesting the JWT contents
-  contents: read   # This is required for actions/checkout (if used)
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
 
 jobs:
   EFS-Backup:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Create EFS Backup with Retention
+      - name: Create EFS Backup
+        id: create_backup
         run: |
-          START_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          EXPIRY_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ -d "1 day")  # Adjust retention period as needed
           BACKUP_JOB_ID=$(aws backup start-backup-job \
             --backup-vault-name "EFS_backup_vault" \
             --resource-arn "arn:aws:elasticfilesystem:ap-south-1:058264262021:file-system/fs-0c7630c295e6d5b45" \
             --iam-role-arn "arn:aws:iam::058264262021:role/githubactions_aws_role" \
             --region "ap-south-1" \
-            --start-time "$START_TIME" \
-            --lifecycle "{\"MovetoColdStorageAfterDays\": 0, \"DeleteAfterDays\": 1}" \
+	          --lifecycle "{\"MovetoColdStorageAfterDays\": 0, \"DeleteAfterDays\": 1}" \
             --query 'BackupJobId' \
             --output text)
           echo "Backup Job ID: $BACKUP_JOB_ID"
