@@ -31,15 +31,20 @@ jobs:
           echo "Backup Job ID: $BACKUP_JOB_ID"
           echo "BACKUP_JOB_ID=$BACKUP_JOB_ID" >> $GITHUB_ENV
 
-      - name: Check Backup Job Status
+      - name: Wait for Backup Completion
         run: |
           BACKUP_JOB_ID=${{ env.BACKUP_JOB_ID }}
-          STATUS=$(aws backup describe-backup-job --backup-job-id $BACKUP_JOB_ID --query 'BackupJob.BackupStatus' --output text)
-          if [[ "$STATUS" != "COMPLETED" ]]; then
-            echo "Backup job not completed yet. Retrying in 5 minutes..."
-            sleep 120
-            exit 1
-          fi
+          MAX_ATTEMPTS=10
+          DELAY=5
+          for ((i=0; i<$MAX_ATTEMPTS; i++)); do
+            STATUS=$(aws backup describe-backup-job --backup-job-id $BACKUP_JOB_ID --query 'BackupJob.BackupStatus' --output text)
+            if [[ "$STATUS" == "COMPLETED" ]]; then
+              break
+            fi
+            echo "Backup not completed yet. Waiting $DELAY seconds..."
+            sleep $DELAY
+            DELAY=$((DELAY * 2))  # Exponential backoff
+          done
 
       - name: Get Recovery Point ARN
         run: |
