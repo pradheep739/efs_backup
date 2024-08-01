@@ -27,7 +27,7 @@ jobs:
             --resource-arn "arn:aws:elasticfilesystem:ap-south-1:058264262021:file-system/fs-0c7630c295e6d5b45" \
             --iam-role-arn "arn:aws:iam::058264262021:role/githubactions_aws_role" \
             --region "ap-south-1" \
-            --lifecycle "DeleteAfterDays\": 1 \
+            --lifecycle "{\"MoveToColdStorageAfterDays\": 1, \"DeleteAfterDays\": 1}" \
             --query 'BackupJobId' \
             --output text)
           echo "Backup Job ID: $BACKUP_JOB_ID"
