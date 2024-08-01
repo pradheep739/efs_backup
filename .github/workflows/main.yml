@@ -4,16 +4,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write   # This is required for requesting the JWT
-  contents: read    # This is required for actions/checkout
+  id-token: write  # This is required for requesting the JWT contents
+  contents: read   # This is required for actions/checkout (if used)
 
 jobs:
   EFS-Backup:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -30,16 +28,21 @@ jobs:
             --query 'BackupJobId' \
             --output text)
           echo "Backup Job ID: $BACKUP_JOB_ID"
-          echo "::set-output name=backup_job_id::$BACKUP_JOB_ID"
+          # Store Backup Job ID in environment variable
+          echo "BACKUP_JOB_ID=$BACKUP_JOB_ID" >> $GITHUB_ENV
 
       - name: Get Recovery Point ARN
         run: |
-          BACKUP_JOB_ID=${{ steps.create_backup.outputs.backup_job_id }}
+          # Retrieve Backup Job ID from environment variable
+          BACKUP_JOB_ID=${{ env.BACKUP_JOB_ID }}
           RECOVERY_POINT_ARN=$(aws backup describe-backup-job --backup-job-id $BACKUP_JOB_ID --query 'BackupJob.RecoveryPoints[0].RecoveryPointArn' --output text)
           echo "Recovery Point ARN: $RECOVERY_POINT_ARN"
-          echo "::set-output name=recovery_point_arn::$RECOVERY_POINT_ARN"
-      
+          # Store Recovery Point ARN in environment variable
+          echo "RECOVERY_POINT_ARN=$RECOVERY_POINT_ARN" >> $GITHUB_ENV
+
       - name: Tag Recovery Point for Retention
         run: |
-          RECOVERY_POINT_ARN=${{ steps.Get_Recovery_Point_ARN.outputs.recovery_point_arn }}
+          # Retrieve Recovery Point ARN from environment variable
+          RECOVERY_POINT_ARN=${{ env.RECOVERY_POINT_ARN }}
           aws backup tag-resource --resource-arn "$RECOVERY_POINT_ARN" --tags Retention=1
+
