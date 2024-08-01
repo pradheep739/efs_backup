@@ -32,6 +32,5 @@ jobs:
             --output text)
           echo "Backup Job ID: $BACKUP_JOB_ID"
           echo "::set-output name=backup_job_id::$BACKUP_JOB_ID"
-          done
 
 
