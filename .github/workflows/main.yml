@@ -36,6 +36,6 @@ jobs:
         run: |
           BACKUP_JOB_ID=${{ steps.create_backup.outputs.backup_job_id }}
           aws backup tag-resource \
-            --resource-arn "arn:aws:backup:${{ secrets.AWS_REGION }}:backup-job/$BACKUP_JOB_ID" \
+            --resource-arn "arn:aws:backup:ap-south-1:058264262021:recovery-point:$BACKUP_JOB_ID" \
             --tags Retention=1
             done
