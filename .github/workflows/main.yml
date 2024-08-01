@@ -37,6 +37,7 @@ jobs:
           STATUS=$(aws backup describe-backup-job --backup-job-id $BACKUP_JOB_ID --query 'BackupJob.BackupStatus' --output text)
           if [[ "$STATUS" != "COMPLETED" ]]; then
             echo "Backup job not completed yet. Retrying in 5 minutes..."
+            sleep 5minutes
             exit 1
           fi
 
