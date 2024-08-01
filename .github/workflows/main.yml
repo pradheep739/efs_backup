@@ -32,10 +32,14 @@ jobs:
           echo "Backup Job ID: $BACKUP_JOB_ID"
           echo "::set-output name=backup_job_id::$BACKUP_JOB_ID"
 
-      - name: Tag Backup for Retention
+      - name: Get Recovery Point ARN
         run: |
           BACKUP_JOB_ID=${{ steps.create_backup.outputs.backup_job_id }}
-          aws backup tag-resource \
-            --resource-arn "arn:aws:backup:${{ secrets.AWS_REGION }}:backup-job/$BACKUP_JOB_ID" \
-            --tags Retention=1
-            done
+          RECOVERY_POINT_ARN=$(aws backup describe-backup-job --backup-job-id $BACKUP_JOB_ID --query 'BackupJob.RecoveryPoints[0].RecoveryPointArn' --output text)
+          echo "Recovery Point ARN: $RECOVERY_POINT_ARN"
+          echo "::set-output name=recovery_point_arn::$RECOVERY_POINT_ARN"
+      
+      - name: Tag Recovery Point for Retention
+        run: |
+          RECOVERY_POINT_ARN=${{ steps.Get_Recovery_Point_ARN.outputs.recovery_point_arn }}
+          aws backup tag-resource --resource-arn "$RECOVERY_POINT_ARN" --tags Retention=1
