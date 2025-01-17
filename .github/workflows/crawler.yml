@@ -28,6 +28,16 @@ permissions:
   contents: read
 
 jobs:
+  Extract-Crawler:
+    - name: Extract crawler
+      id: extract-crawler
+      run: |
+        crawler="${{ github.event.inputs.crawler }}"
+        echo "crawler=$crawler" >> $GITHUB_OUTPUT
+        crawler_Dockerfile= "${{ github.event.inputs.Dockerfile }}
+        echo "crawler_Dockerfile=$crawler_Dockerfile" >> $GITHUB_OUTPUT
+
+
   Build:
     name: Build
     runs-on: ubuntu-latest
@@ -68,5 +78,5 @@ jobs:
           REPOSITORY: ${{ secrets.ADVISOR_ECR_REPO }}
           IMAGE_TAG: ${{ steps.tag.outputs.IMAGE_TAG }}
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build -f "${{ github.event.inputs.Dockerfile }}" -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
