@@ -2,6 +2,26 @@ name: Crawler-Advisor
 
 on:
   workflow_dispatch:
+    inputs:
+      crawler:
+        type: choice
+        description: choose crawler
+        options:
+          - FA-CA
+          - FA-AU
+          - FA-IT
+          - USAT
+          - CNN
+          - Advisor
+      Docekrfile:
+        type: choice
+        description: choose dockerfile respective to site
+        options:
+         - Dockerfile-FA-CA
+         - Dockerfile-FA-AU
+         - Dockerfile-FA-IT
+         - Dockerfile-USAT
+         - Dockerfile-Advisor
 
 permissions:
   id-token: write
