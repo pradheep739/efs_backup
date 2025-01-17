@@ -15,7 +15,7 @@ on:
           - Advisor
       Docekrfile:
         type: choice
-        description: choose dockerfile respective to site
+        description: choose dockerfile respective to sites
         options:
          - Dockerfile-FA-CA
          - Dockerfile-FA-AU
