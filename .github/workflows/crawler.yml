@@ -29,13 +29,13 @@ permissions:
 
 jobs:
   Extract-Crawler:
-    - name: Extract crawler
-      id: extract-crawler
-      run: |
-        crawler="${{ github.event.inputs.crawler }}"
-        echo "crawler=$crawler" >> $GITHUB_OUTPUT
-        crawler_Dockerfile= "${{ github.event.inputs.Dockerfile }}
-        echo "crawler_Dockerfile=$crawler_Dockerfile" >> $GITHUB_OUTPUT
+    name: Extract crawler
+    id: extract-crawler
+    run: |
+      crawler="${{ github.event.inputs.crawler }}"
+      echo "crawler=$crawler" >> $GITHUB_OUTPUT
+      crawler_Dockerfile= "${{ github.event.inputs.Dockerfile }}
+      echo "crawler_Dockerfile=$crawler_Dockerfile" >> $GITHUB_OUTPUT
 
 
   Build:
